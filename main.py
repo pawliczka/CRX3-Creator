@@ -11,9 +11,9 @@ from cryptography.hazmat.primitives.asymmetric import padding
 import argparse
 import io
 
-kCrxFileHeaderMagic = "Cr24"
+kCrxFileHeaderMagic = b"Cr24"
 VERSION = struct.pack("<I", 3)
-kSignatureContext = 'CRX3 SignedData\00'
+kSignatureContext = b'CRX3 SignedData\00'
 fileBufferLength = 4096
 
 
