@@ -1,4 +1,3 @@
-import dircache
 import os
 import zipfile
 import crx3_pb2
@@ -12,9 +11,9 @@ from cryptography.hazmat.primitives.asymmetric import padding
 import argparse
 import io
 
-kCrxFileHeaderMagic = "Cr24"
+kCrxFileHeaderMagic = b"Cr24"
 VERSION = struct.pack("<I", 3)
-kSignatureContext = 'CRX3 SignedData\00'
+kSignatureContext = b'CRX3 SignedData\00'
 fileBufferLength = 4096
 
 
@@ -105,7 +104,7 @@ def zipdir(directory, inject=None):
           fpath = '%s/%s' % (directory, fname)
           zf.writestr(fname, fdata)
 
-      for d in dircache.listdir(path):
+      for d in os.listdir(path):
         child = os.path.join(path, d)
         name = "%s/%s" % (parent, d)
         if os.path.isfile(child):
