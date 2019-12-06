@@ -1,4 +1,3 @@
-import dircache
 import os
 import zipfile
 import crx3_pb2
@@ -105,7 +104,7 @@ def zipdir(directory, inject=None):
           fpath = '%s/%s' % (directory, fname)
           zf.writestr(fname, fdata)
 
-      for d in dircache.listdir(path):
+      for d in os.listdir(path):
         child = os.path.join(path, d)
         name = "%s/%s" % (parent, d)
         if os.path.isfile(child):
