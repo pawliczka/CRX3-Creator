@@ -18,6 +18,10 @@ def rm_trailing_slash(d):
     return d[:-1] if d.endswith(os.path.sep) else d
 
 
+def rm_zip_extension(zip_fn):
+    return zip_fn[:-4] if zip_fn.endswith('.zip') else zip_fn
+
+
 def create_publickey(private_key):
     public_key = private_key.public_key()
     data = public_key.public_bytes(
@@ -49,16 +53,21 @@ def create_privatekey(path, crxd):
         return pem, private_key
 
 
-def package(basedir, private_key, output, files=None):
-    if not os.path.isdir(basedir):
-        raise IOError('Non-existant directory <%s>' % basedir)
-    crxd = rm_trailing_slash(basedir)
-    try:
-        zipdata = zipdir(crxd, inject=files)
-    except IOError as e:
-        raise e
+def get_zipped_data_and_basename_from_dir_or_zip(dir_or_zip):
+    if zipfile.is_zipfile(dir_or_zip):
+        with open(dir_or_zip, 'rb') as zipfh:
+            return io.BytesIO(zipfh.read()).getvalue(), rm_zip_extension(dir_or_zip)
+    elif os.path.isdir(dir_or_zip):
+        crxd = rm_trailing_slash(dir_or_zip)
+        return zipdir(crxd), crxd
+    else:
+        raise IOError('Source is not a directory or zip file <%s>' % dir_or_zip)
 
-    pem, private_key = create_privatekey(private_key, crxd)
+
+def package(dir_or_zip, private_key, output):
+    zipdata, basename = get_zipped_data_and_basename_from_dir_or_zip(dir_or_zip)
+
+    pem, private_key = create_privatekey(private_key, basename)
     public_key = create_publickey(private_key)
 
     signed_header_data_str = create_signed_header_data_str(public_key)
@@ -66,7 +75,7 @@ def package(basedir, private_key, output, files=None):
     signed = sign(signed_header_data_str, zipdata, private_key)
     header_str = create_header_str(public_key, signed, signed_header_data_str)
 
-    save_crx_file(header_str, zipdata, output, crxd)
+    save_crx_file(header_str, zipdata, output, basename)
 
 
 def sign(signed_header_data_str, zipped, private_key):
