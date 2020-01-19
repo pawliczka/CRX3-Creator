@@ -18,7 +18,7 @@ directory for testing purposes:
 
 ## Requires:
 
-  $ pip2 install -r requirements.txt
+  $ pip install -r requirements.txt
 
 ## Resources:
 
